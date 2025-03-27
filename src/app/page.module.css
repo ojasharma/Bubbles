@@ -3,3 +3,14 @@
     height: 100vh;
     background-color: black;
 }
+
+
+.scene {
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 1110px) {
+  .scene {
+    transform: scale(0.9); /* Adjust the scale as per your needs */
+  }
+}

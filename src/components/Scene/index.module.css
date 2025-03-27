@@ -1,0 +1,28 @@
+/* index.module.css */
+
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.canvas {
+  background: #000000;
+}
+
+.text {
+  position: absolute;
+  bottom: 50px;
+  width: 100%;
+  text-align: center;
+  font-family: "DL", sans-serif;
+  font-size: 16px; /* Smaller font size */
+  color: white; 
+  opacity: 0; /* Start with opacity 0 */
+  transition: opacity 0.5s ease-in-out; /* Smooth fade-in/out */
+  pointer-events: none; /* Prevent text from interfering with hover */
+}
+
+.textVisible {
+  opacity: 1; /* Opacity change */
+}
