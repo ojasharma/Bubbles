@@ -77,8 +77,28 @@ export default function Model({ setHovered, hovered }) {
     });
   }, [DL]);
 
+  // Add Welcome text
+  const welcomeLetters = useMemo(() => {
+    const word = "WelcomE to";
+    const spacing = 0.43;
+    const material = new THREE.MeshStandardMaterial({ color: 0x666666 });
+
+    return word.split("").map((char, i) => {
+      const geometry = new TextGeometry(char, {
+        font: DL,
+        size: 0.3,
+        height: 0.001,
+        curveSegments: 12,
+      });
+      geometry.center();
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = (i - word.length / 2) * spacing;
+      return mesh;
+    });
+  }, [DL]);
+
   const letterRefs = useRef([]);
-  letterRefs.current = [...letters, ...hubblesLetters];
+  letterRefs.current = [...letters, ...hubblesLetters, ...welcomeLetters];
 
   const [springs, api] = useSprings(letters.length, () => ({
     rotation: [0, 0, 0],
@@ -209,6 +229,12 @@ export default function Model({ setHovered, hovered }) {
         <group position={[6.7, -4, 0]}>
           {hubblesLetters.map((mesh, i) => (
             <a.primitive object={mesh} key={i} />
+          ))}
+        </group>
+        {/* Add Welcome text group positioned at top left */}
+        <group position={[-9.5, 4, 0]}>
+          {welcomeLetters.map((mesh, i) => (
+            <a.primitive object={mesh} key={`welcome-${i}`} />
           ))}
         </group>
       </group>
