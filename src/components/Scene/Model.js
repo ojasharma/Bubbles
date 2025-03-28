@@ -28,6 +28,14 @@ export default function Model({ setHovered, hovered }) {
     config: { tension: 120, friction: 14 },
   }));
 
+  // Update scale when hover state changes
+  useEffect(() => {
+    scaleApi.start({
+      scale: hovered ? 22 : 20, // Increase scale by 2 when hovered
+      config: { tension: 120, friction: 14 },
+    });
+  }, [hovered, scaleApi]);
+
   const LG = useLoader(FontLoader, "/fonts/LG-R.json");
   const DL = useLoader(FontLoader, "/fonts/DL.json");
 

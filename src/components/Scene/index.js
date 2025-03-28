@@ -18,7 +18,7 @@ export default function Index() {
 
       {/* Text below 3D, visible only on hover with fade-in animation */}
       <div className={`${styles.text} ${hovered ? styles.textVisible : ""}`}>
-        Click to sign in
+        Click on the object to sign in
       </div>
     </div>
   );
