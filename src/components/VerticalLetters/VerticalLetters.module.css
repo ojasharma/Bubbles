@@ -1,0 +1,71 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Prevent any overflow issues */
+}
+
+.letterColumns {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch; /* Ensure columns are aligned */
+  height: 100%;
+}
+
+.scrollContainer {
+  height: 100vh;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
+  /* Margin and padding set inline for better control */
+}
+
+.scrollContainer:active {
+  cursor: grabbing;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Ensure content uses full width of container */
+}
+
+.letter {
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
+  /* Height, margin, and font size set dynamically via inline styles */
+}
+
+/* Font classes */
+.nml {
+  font-family: 'NML', sans-serif;
+}
+
+.nmli {
+  font-family: 'NMLI', sans-serif;
+}
+
+.nmr {
+  font-family: 'NMR', sans-serif;
+}
+
+.nmri {
+  font-family: 'NMRI', sans-serif;
+}
+
+.nmub {
+  font-family: 'NMUB', sans-serif;
+}
+
+.nmubi {
+  font-family: 'NMUBI', sans-serif;
+}

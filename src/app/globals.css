@@ -1,10 +1,27 @@
-body{
-    margin: 0px;
+/* globals.css */
+body {
+  margin: 0;
+  overflow: hidden;
 }
 
+/* Existing font faces */
 @font-face {
   font-family: 'IL';
   src: url('/fonts/I-L.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IB';
+  src: url('/fonts/I-B.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LG';
+  src: url('/fonts/LG-R.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,4 +31,47 @@ body{
   src: url('/fonts/DL.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
+}
+
+/* New NM font faces */
+@font-face {
+  font-family: 'NML';
+  src: url('/fonts/NML.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NMLI';
+  src: url('/fonts/DL.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'NMR';
+  src: url('/fonts/NMR.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NMRI';
+  src: url('/fonts/DL.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'NMUB';
+  src: url('/fonts/NMUB.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NMUBI';
+  src: url('/fonts/DL.otf') format('opentype');
+  font-weight: bold;
+  font-style: italic;
 }

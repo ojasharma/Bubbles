@@ -10,6 +10,9 @@ export default function Index() {
 
   return (
     <div className={styles.container}>
+      {/* Add the big blue circle as the first element */}
+      <div className={styles.backgroundCircle}></div>
+      
       <div className={styles.canvasWrapper}>
         <Canvas className={styles.canvas}>
           <Model hovered={hovered} setHovered={setHovered} />

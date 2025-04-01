@@ -12,6 +12,25 @@ export default function Model({ setHovered, hovered }) {
   const { camera } = useThree();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // Load the arrow SVG
+  const arrowSvg = useLoader(THREE.TextureLoader, "/arrow.svg");
+   const arrowRef = useRef();
+   const { gl } = useThree(); // Get the WebGL renderer
+
+   const handleArrowClick1 = () => {
+     // Open link in new tab
+     window.open("https://github.com/ojasharma", "_blank");
+
+     // Alternative: open in same tab
+     // window.location.href = 'https://your-link-here.com';
+   };
+   const handleArrowClick2 = () => {
+     // Open link in new tab
+     window.open("https://x.com/DieselSharma", "_blank");
+
+     // Alternative: open in same tab
+     // window.location.href = 'https://your-link-here.com';
+   };
   // Update windowWidth on resize
   useEffect(() => {
     const handleResize = () => {
@@ -250,6 +269,62 @@ export default function Model({ setHovered, hovered }) {
           <MeshTransmissionMaterial {...materialProps} />
         </a.mesh>
       </a.group>
+
+      {/* Add arrow SVG to the scene */}
+      <mesh
+        position={[4.9, 2, 0]}
+        rotation={[Math.PI, Math.PI, 0]} // Now this will work!
+        scale={[0.2, 0.2, 0.2]}
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+          // Safe hover effect with null check
+          if (arrowRef.current) {
+            arrowRef.current.scale.set(0.22, 0.22, 0.22);
+          }
+        }}
+        onClick={handleArrowClick2}
+        onPointerOut={() => {
+          document.body.style.cursor = "auto";
+          // Safe reset with null check
+          if (arrowRef.current) {
+            arrowRef.current.scale.set(0.2, 0.2, 0.2);
+          }
+        }}
+      >
+        <planeGeometry args={[1, 1]} /> {/* Width, height */}
+        <meshBasicMaterial
+          map={arrowSvg}
+          transparent={true}
+          side={THREE.DoubleSide} // Shows from both sides
+        />
+      </mesh>
+      <mesh
+        position={[-5, -2, 0]}
+        rotation={[0, 0, 0]} // Now this will work!
+        scale={[0.2, 0.2, 0.2]}
+        onClick={handleArrowClick1}
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+          // Safe hover effect with null check
+          if (arrowRef.current) {
+            arrowRef.current.scale.set(0.22, 0.22, 0.22);
+          }
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "auto";
+          // Safe reset with null check
+          if (arrowRef.current) {
+            arrowRef.current.scale.set(0.2, 0.2, 0.2);
+          }
+        }}
+      >
+        <planeGeometry args={[1, 1]} /> {/* Width, height */}
+        <meshBasicMaterial
+          map={arrowSvg}
+          transparent={true}
+          side={THREE.DoubleSide} // Shows from both sides
+        />
+      </mesh>
     </a.group>
   );
 }

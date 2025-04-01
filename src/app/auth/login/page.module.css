@@ -1,0 +1,55 @@
+.container {
+  background: black;
+  min-height: 100vh;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* New overlay styling */
+.lettersOverlay {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: auto;
+  z-index: 10; /* Higher than logo */
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none; /* Allows clicks to pass through to elements below */
+}
+
+/* Make sure VerticalLetters container doesn't block interactions */
+.lettersOverlay > div {
+  pointer-events: auto;
+}
+
+.logoContainer {
+  position: absolute;
+  width: min(200vw, 200vh);
+  height: min(200vw, 200vh);
+  transform: translate(40%, -50%);
+  top: 50%;
+  right: 0;
+  z-index: 1; /* Lower than letters */
+}
+
+.logo {
+  object-fit: contain;
+  animation: rotate 200s linear infinite;
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  pointer-events: none; /* Prevent pointer events */
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
