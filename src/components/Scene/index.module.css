@@ -47,7 +47,18 @@
   -webkit-text-fill-color: transparent;
 }
 
+.backgroundCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(150vw, 150vh);
+  height: min(150vw, 150vh);
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a237e 0%, #000000 70%);
+  z-index: -1;
+}
+
 .textVisible {
   opacity: 1;
 }
-

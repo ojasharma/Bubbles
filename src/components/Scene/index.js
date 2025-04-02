@@ -9,12 +9,12 @@ export default function Index() {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div className={styles.container}>
+    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       {/* Add the big blue circle as the first element */}
       <div className={styles.backgroundCircle}></div>
-      
-      <div className={styles.canvasWrapper}>
-        <Canvas className={styles.canvas}>
+
+      <div style={{ width: "100%", height: "100%" }}>
+        <Canvas style={{ width: "100%", height: "100%" }}>
           <Model hovered={hovered} setHovered={setHovered} />
           <directionalLight intensity={2} position={[0, 2, 3]} />
           <Environment preset="studio" />
