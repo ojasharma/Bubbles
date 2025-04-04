@@ -8,7 +8,7 @@ export default function LoadingScreen() {
       {/* Optional: Content inside the blurred overlay */}
       <div className={styles.loadingContent}>
         <div className={styles.loadingSpinner}></div>
-        <p>Loading Scene...</p>
+        <p>Please Wait...</p>
       </div>
     </div>
   );

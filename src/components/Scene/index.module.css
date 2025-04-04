@@ -39,7 +39,8 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(195, 200, 192, 0.8) 0%,
+    rgba(201, 201, 201, 0.8) 0%,
+     rgba(201, 201, 201, 0.8) 50%,
     rgba(0, 0, 0, 0) 100%
   );
   -webkit-background-clip: text;

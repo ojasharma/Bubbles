@@ -16,6 +16,10 @@ export default function Model({ setHovered, hovered }) {
 
   // --- Load Assets ---
   const arrowSvg = useLoader(THREE.TextureLoader, "/arrow.svg");
+  const googleSvg = useLoader(THREE.TextureLoader, "/google.svg");
+  const appleSvg = useLoader(THREE.TextureLoader, "/apple.svg");
+  const microsoftSvg = useLoader(THREE.TextureLoader, "/microsoft.svg");
+  const facebookSvg = useLoader(THREE.TextureLoader, "/facebook.svg");
   const LG = useLoader(FontLoader, "/fonts/LG-R.json");
   const DL = useLoader(FontLoader, "/fonts/DL.json");
 
@@ -47,6 +51,34 @@ export default function Model({ setHovered, hovered }) {
     config: { mass: 1, tension: 120, friction: 20, precision: 0.001 },
   }));
 
+  // Google logo spring
+  const [googleSpring, googleApi] = useSpring(() => ({
+    position: [0, 0, 0],
+    opacity: 0, // Start with 0 opacity
+    config: { tension: 120, friction: 14 },
+  }));
+
+  // Apple logo spring
+  const [appleSpring, appleApi] = useSpring(() => ({
+    position: [0, 0, 0],
+    opacity: 0,
+    config: { tension: 120, friction: 14 },
+  }));
+
+  // Microsoft logo spring
+  const [microsoftSpring, microsoftApi] = useSpring(() => ({
+    position: [0, 0, 0],
+    opacity: 0,
+    config: { tension: 120, friction: 14 },
+  }));
+
+  // Facebook logo spring
+  const [facebookSpring, facebookApi] = useSpring(() => ({
+    position: [0, 0, 0],
+    opacity: 0,
+    config: { tension: 120, friction: 14 },
+  }));
+
   // --- Event Handlers ---
   const handleArrowClick1 = (e) => {
     e.stopPropagation();
@@ -58,62 +90,103 @@ export default function Model({ setHovered, hovered }) {
     window.open("https://x.com/DieselSharma", "_blank");
   };
 
-  const handleClick = () => {
-    const isCurrentlyClicked = !clicked;
-    setClicked(isCurrentlyClicked);
+const handleClick = () => {
+  const isCurrentlyClicked = !clicked;
+  setClicked(isCurrentlyClicked);
+  shouldRotate.current = false;
 
-    // Pause rotation while animating
-    shouldRotate.current = false;
+  const slowConfig = { tension: 130, friction: 30, mass: 2 };
+  const returnConfig = { tension: 60, friction: 30, mass: 1.5 };
 
-    const slowConfig = { tension: 130, friction: 30, mass: 2 };
-    const returnConfig = { tension: 60, friction: 30, mass: 1.5 };
+  if (isCurrentlyClicked) {
+    // GOING TO clicked state
+    // Animate torus
+    torusApi.start({
+      scale: 15,
+      position: [0, 0, 0],
+      rotation: [0, 0, -Math.PI / 2],
+      config: slowConfig,
+    });
 
-    if (isCurrentlyClicked) {
-      // GOING TO clicked state
-      torusApi.start({
-        scale: 15,
-        position: [0, 0, 0],
-        rotation: [0, 0, -Math.PI / 2],
-        config: slowConfig,
-      });
+    // Hide other elements
+    otherElementsApi.start({
+      opacity: 0,
+      zPosition: -1,
+      config: slowConfig,
+    });
 
-      otherElementsApi.start({
-        opacity: 0,
-        zPosition: -1,
-        config: slowConfig,
-      });
-    } else {
-      // RETURNING FROM clicked state
-      // Set returning flag to temporarily disable hover effects
-      setIsReturning(true);
+    // Show and position logos
+    googleApi.start({
+      position: [0, 2.3, 0],
+      opacity: 1,
+      config: slowConfig,
+    });
+    appleApi.start({
+      position: [0, -2.3, 0],
+      opacity: 1,
+      config: slowConfig,
+    });
+    microsoftApi.start({
+      position: [2.3, 0, 0],
+      opacity: 1,
+      config: slowConfig,
+    });
+    facebookApi.start({
+      position: [-2.3, 0, 0],
+      opacity: 1,
+      config: slowConfig,
+    });
+  } else {
+    // RETURNING FROM clicked state
+    setIsReturning(true);
 
-      torusApi.start({
-        scale: 20,
-        position: [0, 0, 0],
-        rotation: [0, 0, 0],
-        config: returnConfig,
-        // When animation completes, re-enable hover effects AND rotation
-        onRest: () => {
-          setIsReturning(false);
-          // Resume rotation when animation completes
-          shouldRotate.current = true;
+    // Animate torus back
+    torusApi.start({
+      scale: 20,
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      config: returnConfig,
+      onRest: () => {
+        setIsReturning(false);
+        shouldRotate.current = true;
+        if (torus.current) {
+          torus.current.rotation.x = 0;
+          torus.current.rotation.y = 0;
+          torus.current.rotation.z = 0;
+        }
+      },
+    });
 
-          // Reset torus rotation values to ensure consistent start
-          if (torus.current) {
-            torus.current.rotation.x = 0;
-            torus.current.rotation.y = 0;
-            torus.current.rotation.z = 0;
-          }
-        },
-      });
+    // Show other elements
+    otherElementsApi.start({
+      opacity: 1,
+      zPosition: 0,
+      config: returnConfig,
+    });
 
-      otherElementsApi.start({
-        opacity: 1,
-        zPosition: 0,
-        config: returnConfig,
-      });
-    }
-  };
+    // Hide and reset logo positions
+    googleApi.start({
+      position: [0, 0, 0],
+      opacity: 0,
+      config: returnConfig,
+    });
+    appleApi.start({
+      position: [0, 0, 0],
+      opacity: 0,
+      config: returnConfig,
+    });
+    microsoftApi.start({
+      position: [0, 0, 0],
+      opacity: 0,
+      config: returnConfig,
+    });
+    facebookApi.start({
+      position: [0, 0, 0],
+      opacity: 0,
+      config: returnConfig,
+    });
+  }
+};
 
   useEffect(() => {
     const handleResize = () => {
@@ -175,6 +248,54 @@ export default function Model({ setHovered, hovered }) {
         side: THREE.DoubleSide,
       }),
     [arrowSvg]
+  );
+
+  const googleMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: googleSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 1, 1), // Brighten the colors
+        toneMapped: false, // Disable tone mapping for more vibrant colors
+      }),
+    [googleSvg]
+  );
+
+  const appleMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: appleSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 1, 1), // Brighten the colors
+        toneMapped: false, // Disable tone mapping for more vibrant colors
+      }),
+    [appleSvg]
+  );
+
+  const microsoftMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: microsoftSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 1, 1), // Brighten the colors
+        toneMapped: false, // Disable tone mapping for more vibrant colors
+      }),
+    [microsoftSvg]
+  );
+
+  const facebookMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: facebookSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 1, 1), // Brighten the colors
+        toneMapped: false, // Disable tone mapping for more vibrant colors
+      }),
+    [facebookSvg]
   );
 
   const materialProps = useMemo(
@@ -343,6 +464,46 @@ export default function Model({ setHovered, hovered }) {
           <MeshTransmissionMaterial {...materialProps} />
         </a.mesh>
       </a.group>
+
+      {/* Google Logo */}
+      <a.mesh position={googleSpring.position} scale={[0.6, 0.6, 0.6]}>
+        <planeGeometry args={[1, 1]} />
+        <a.primitive
+          object={googleMaterial}
+          attach="material"
+          opacity={googleSpring.opacity}
+        />
+      </a.mesh>
+
+      {/* Apple Logo */}
+      <a.mesh position={appleSpring.position} scale={[0.6, 0.6, 0.6]}>
+        <planeGeometry args={[1, 1]} />
+        <a.primitive
+          object={appleMaterial}
+          attach="material"
+          opacity={appleSpring.opacity}
+        />
+      </a.mesh>
+
+      {/* Microsoft Logo */}
+      <a.mesh position={microsoftSpring.position} scale={[0.6, 0.6, 0.6]}>
+        <planeGeometry args={[1, 1]} />
+        <a.primitive
+          object={microsoftMaterial}
+          attach="material"
+          opacity={microsoftSpring.opacity}
+        />
+      </a.mesh>
+
+      {/* Facebook Logo */}
+      <a.mesh position={facebookSpring.position} scale={[0.6, 0.6, 0.6]}>
+        <planeGeometry args={[1, 1]} />
+        <a.primitive
+          object={facebookMaterial}
+          attach="material"
+          opacity={facebookSpring.opacity}
+        />
+      </a.mesh>
 
       {/* === Wrapper Group for Other Elements (Text + Arrows) === */}
       <a.group
