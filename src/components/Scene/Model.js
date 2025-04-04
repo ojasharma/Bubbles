@@ -7,36 +7,28 @@ import * as THREE from "three";
 import { useSpring, a, useSprings } from "@react-spring/three";
 
 export default function Model({ setHovered, hovered }) {
+  // --- Basic Setup ---
   const { nodes } = useGLTF("/medias/bubble3d.glb");
   const torus = useRef();
   const { camera } = useThree();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [clicked, setClicked] = useState(false);
 
-  // Load the arrow SVG
+  // --- Load Assets ---
   const arrowSvg = useLoader(THREE.TextureLoader, "/arrow.svg");
-  const arrowRef = useRef();
-  const { gl } = useThree();
+  const LG = useLoader(FontLoader, "/fonts/LG-R.json");
+  const DL = useLoader(FontLoader, "/fonts/DL.json");
 
-  const handleArrowClick1 = () => {
-    window.open("https://github.com/ojasharma", "_blank");
-  };
-  const handleArrowClick2 = () => {
-    window.open("https://x.com/DieselSharma", "_blank");
-  };
+  // --- Refs for Elements ---
+  const arrowRef1 = useRef();
+  const arrowRef2 = useRef();
+  const letterRefs = useRef([]);
 
-  // Update windowWidth on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  // --- Springs for Animation ---
+  const [isReturning, setIsReturning] = useState(false);
+  // Add this to track when rotation should be paused
+  const shouldRotate = useRef(true);
 
-  // Animation springs for transformations
   const [torusSpring, torusApi] = useSpring(() => ({
     scale: 20,
     rotation: [0, 0, 0],
@@ -44,59 +36,163 @@ export default function Model({ setHovered, hovered }) {
     config: { tension: 120, friction: 14 },
   }));
 
-const handleClick = () => {
-  setClicked(!clicked);
+  const [otherElementsSpring, otherElementsApi] = useSpring(() => ({
+    opacity: 1,
+    zPosition: 0,
+    config: { tension: 80, friction: 20 },
+  }));
 
-  // SLOW animation config (for clicked state)
-  const slowConfig = {
-    tension: 60, // Lower = slower acceleration (default was 120)
-    friction: 30, // Higher = quicker slowdown (default was 14)
-    mass: 2, // Higher = more "weight" (default was 1)
+  const [letterSprings, letterApi] = useSprings(7, () => ({
+    rotation: [0, 0, 0],
+    config: { mass: 1, tension: 120, friction: 20, precision: 0.001 },
+  }));
+
+  // --- Event Handlers ---
+  const handleArrowClick1 = (e) => {
+    e.stopPropagation();
+    window.open("https://github.com/ojasharma", "_blank");
   };
 
-  // Return to normal config (also slightly slower than before)
-  const returnConfig = {
-    tension: 80,
-    friction: 20,
-    mass: 1.5,
+  const handleArrowClick2 = (e) => {
+    e.stopPropagation();
+    window.open("https://x.com/DieselSharma", "_blank");
   };
 
-  if (!clicked) {
-    torusApi.start({
-      scale: 150,
-      position: [9, 0, -5],
-      rotation: [0, Math.PI * 0.9, 0],
-      config: slowConfig, // Apply slow animation
-    });
-  } else {
-    torusApi.start({
-      scale: 20,
-      position: [0, 0, 0],
-      rotation: [0, 0, 0],
-      config: returnConfig, // Slower return
-    });
-  }
-};
+  const handleClick = () => {
+    const isCurrentlyClicked = !clicked;
+    setClicked(isCurrentlyClicked);
 
-  // Update scale and rotation when hover state changes
+    // Pause rotation while animating
+    shouldRotate.current = false;
+
+    const slowConfig = { tension: 130, friction: 30, mass: 2 };
+    const returnConfig = { tension: 60, friction: 30, mass: 1.5 };
+
+    if (isCurrentlyClicked) {
+      // GOING TO clicked state
+      torusApi.start({
+        scale: 15,
+        position: [0, 0, 0],
+        rotation: [0, 0, -Math.PI / 2],
+        config: slowConfig,
+      });
+
+      otherElementsApi.start({
+        opacity: 0,
+        zPosition: -1,
+        config: slowConfig,
+      });
+    } else {
+      // RETURNING FROM clicked state
+      // Set returning flag to temporarily disable hover effects
+      setIsReturning(true);
+
+      torusApi.start({
+        scale: 20,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        config: returnConfig,
+        // When animation completes, re-enable hover effects AND rotation
+        onRest: () => {
+          setIsReturning(false);
+          // Resume rotation when animation completes
+          shouldRotate.current = true;
+
+          // Reset torus rotation values to ensure consistent start
+          if (torus.current) {
+            torus.current.rotation.x = 0;
+            torus.current.rotation.y = 0;
+            torus.current.rotation.z = 0;
+          }
+        },
+      });
+
+      otherElementsApi.start({
+        opacity: 1,
+        zPosition: 0,
+        config: returnConfig,
+      });
+    }
+  };
+
   useEffect(() => {
-    if (!clicked) {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Only apply hover effects when NOT clicked AND NOT currently returning from clicked state
+    if (!clicked && !isReturning) {
       torusApi.start({
         scale: hovered ? 22 : 20,
         rotation: hovered ? [0, 0, 0] : torusSpring.rotation.get(),
         config: { tension: 120, friction: 14 },
       });
     }
-  }, [hovered, torusApi, clicked]);
+  }, [hovered, clicked, isReturning, torusApi, torusSpring.rotation]);
 
-  const LG = useLoader(FontLoader, "/fonts/LG-R.json");
-  const DL = useLoader(FontLoader, "/fonts/DL.json");
+  useEffect(() => {
+    const onMouseMove = (event) => {
+      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
 
+    window.addEventListener("mousemove", onMouseMove);
+
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
+  // --- Materials ---
+  const textMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: 0x666666,
+      transparent: true,
+    });
+  }, []);
+
+  const arrowMaterial1 = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: arrowSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+      }),
+    [arrowSvg]
+  );
+
+  const arrowMaterial2 = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: arrowSvg,
+        transparent: true,
+        side: THREE.DoubleSide,
+      }),
+    [arrowSvg]
+  );
+
+  const materialProps = useMemo(
+    () => ({
+      thickness: 1.1,
+      roughness: 0,
+      transmission: 1,
+      ior: 1.2,
+      chromaticAberration: 0.02,
+      backside: true,
+    }),
+    []
+  );
+
+  // --- Text Geometries ---
   const letters = useMemo(() => {
     const word = "BUBBLES";
     const spacing = 3;
-    const material = new THREE.MeshStandardMaterial({ color: 0x666666 });
-
     return word.split("").map((char, i) => {
       const geometry = new TextGeometry(char, {
         font: LG,
@@ -105,17 +201,16 @@ const handleClick = () => {
         curveSegments: 12,
       });
       geometry.center();
-      const mesh = new THREE.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, textMaterial);
       mesh.position.x = (i - word.length / 2) * spacing;
+      mesh.name = `bubble-letter-${char}-${i}`;
       return mesh;
     });
-  }, [LG]);
+  }, [LG, textMaterial]);
 
   const hubblesLetters = useMemo(() => {
     const word = "Note TakeR";
     const spacing = 0.43;
-    const material = new THREE.MeshStandardMaterial({ color: 0x666666 });
-
     return word.split("").map((char, i) => {
       const geometry = new TextGeometry(char, {
         font: DL,
@@ -124,17 +219,16 @@ const handleClick = () => {
         curveSegments: 12,
       });
       geometry.center();
-      const mesh = new THREE.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, textMaterial);
       mesh.position.x = (i - word.length / 2) * spacing;
+      mesh.name = `note-letter-${char}-${i}`;
       return mesh;
     });
-  }, [DL]);
+  }, [DL, textMaterial]);
 
   const welcomeLetters = useMemo(() => {
     const word = "WelcomE to";
     const spacing = 0.43;
-    const material = new THREE.MeshStandardMaterial({ color: 0x666666 });
-
     return word.split("").map((char, i) => {
       const geometry = new TextGeometry(char, {
         font: DL,
@@ -143,39 +237,33 @@ const handleClick = () => {
         curveSegments: 12,
       });
       geometry.center();
-      const mesh = new THREE.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, textMaterial);
       mesh.position.x = (i - word.length / 2) * spacing;
+      mesh.name = `welcome-letter-${char}-${i}`;
       return mesh;
     });
-  }, [DL]);
-
-  const letterRefs = useRef([]);
-  letterRefs.current = [...letters, ...hubblesLetters, ...welcomeLetters];
-
-  const [springs, api] = useSprings(letters.length, () => ({
-    rotation: [0, 0, 0],
-    config: { mass: 1, tension: 120, friction: 20, precision: 0.001 },
-  }));
-
-  const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  const mouse = useRef(new THREE.Vector2());
-  const [hoveredLetter, setHoveredLetter] = React.useState(null);
-  const lastHoverTimes = useRef(Array(letters.length).fill(null));
+  }, [DL, textMaterial]);
 
   useEffect(() => {
-    const onMouseMove = (event) => {
-      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    return () => window.removeEventListener("mousemove", onMouseMove);
-  }, []);
+    letterRefs.current = [...letters, ...hubblesLetters, ...welcomeLetters];
+  }, [letters, hubblesLetters, welcomeLetters]);
 
-  useFrame(() => {
-    // Only continue the automatic rotation when NOT hovered and NOT clicked
-    if (!hovered && !clicked && torus.current) {
-      torus.current.rotation.x += 0.003;
-      torus.current.rotation.y += 0.003;
+  // --- Raycasting Setup ---
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  const mouse = useRef(new THREE.Vector2());
+  const [hoveredLetter, setHoveredLetter] = useState(null);
+  const lastHoverTimes = useRef(Array(letters.length).fill(null));
+
+  // --- Frame Loop ---
+  useFrame((state, delta) => {
+    // 1. Continuous Torus rotation ONLY when:
+    // - not hovered
+    // - not clicked
+    // - shouldRotate flag is true
+    if (!hovered && !clicked && torus.current && shouldRotate.current) {
+      torus.current.rotation.x += 0.002;
+      torus.current.rotation.y += 0.002;
+
       torusApi.set({
         rotation: [
           torus.current.rotation.x,
@@ -185,27 +273,17 @@ const handleClick = () => {
       });
     }
 
+    // 2. Raycasting for Letter Hover Interaction (only BUBBLES letters)
     raycaster.setFromCamera(mouse.current, camera);
-    const modelIntersects = raycaster.intersectObject(torus.current, true);
-    const letterIntersects = raycaster.intersectObjects(
-      letterRefs.current,
-      true
-    );
+    const intersects = raycaster.intersectObjects(letters);
+    let newHovered = intersects.length > 0 ? intersects[0].object : null;
 
-    let newHovered = null;
-
-    if (letterIntersects.length > 0) {
-      const letterHit = letterIntersects[0];
-      const modelHit = modelIntersects.length > 0 ? modelIntersects[0] : null;
-
-      if (!modelHit || modelHit.distance > letterHit.distance) {
-        newHovered = letterHit.object;
-      }
+    if (hoveredLetter !== newHovered) {
+      setHoveredLetter(newHovered);
     }
 
-    setHoveredLetter((prev) => (prev !== newHovered ? newHovered : prev));
-
-    letterRefs.current.forEach((letter, i) => {
+    // 3. Animate 'BUBBLES' letters based on hover
+    letters.forEach((letter, i) => {
       if (letter === newHovered) {
         const vector = letter.position.clone().project(camera);
         const deltaX = THREE.MathUtils.clamp(
@@ -220,119 +298,164 @@ const handleClick = () => {
         );
         const targetRotX = -deltaY * 5;
         const targetRotY = deltaX * 15;
-
         lastHoverTimes.current[i] = Date.now();
 
-        api.start((index) =>
-          index === i ? { rotation: [targetRotX, targetRotY, 0] } : null
+        letterApi.start((index) =>
+          index === i ? { rotation: [targetRotX, targetRotY, 0] } : undefined
         );
       }
     });
 
+    // 4. Reset letter rotation after hover timeout
     const now = Date.now();
     lastHoverTimes.current.forEach((time, i) => {
-      if (time && now - time > 1000) {
-        api.start((index) => (index === i ? { rotation: [0, 0, 0] } : null));
+      if (time && now - time > 500) {
+        letterApi.start((index) =>
+          index === i ? { rotation: [0, 0, 0] } : undefined
+        );
         lastHoverTimes.current[i] = null;
       }
     });
   });
 
-  const materialProps = {
-    thickness: 1.1,
-    roughness: 0,
-    transmission: 1,
-    ior: 1.2,
-    chromaticAberration: 0.02,
-    backside: true,
-  };
+  // --- Constants for Rendering ---
+  const otherElementsScale = 1;
 
+  // --- Render ---
   return (
-    <a.group
-      style={{
-        transform: windowWidth <= 1109 ? "scale(0.8)" : "scale(1)",
-        transition: "transform 0.3s ease",
-      }}
-    >
-      <group position={[1.5, 0, -5]}>
-        {letters.map((mesh, i) => (
-          <a.primitive object={mesh} key={i} rotation={springs[i].rotation} />
-        ))}
-        <group position={[6.7, -4, 0]}>
-          {hubblesLetters.map((mesh, i) => (
-            <a.primitive object={mesh} key={i} />
-          ))}
-        </group>
-        <group position={[-9.5, 4, 0]}>
-          {welcomeLetters.map((mesh, i) => (
-            <a.primitive object={mesh} key={`welcome-${i}`} />
-          ))}
-        </group>
-      </group>
-
+    <group>
+      {/* === Torus Model === */}
       <a.group scale={torusSpring.scale} position={torusSpring.position}>
         <a.mesh
           ref={torus}
           geometry={nodes.Curve.geometry}
           rotation={torusSpring.rotation}
-          onPointerOver={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            if (!clicked && !isReturning) setHovered(true);
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            setHovered(false);
+          }}
           onClick={handleClick}
         >
           <MeshTransmissionMaterial {...materialProps} />
         </a.mesh>
       </a.group>
 
-      <mesh
-        position={[4.9, 2, 0]}
-        rotation={[Math.PI, Math.PI, 0]}
-        scale={[0.2, 0.2, 0.2]}
-        onPointerOver={() => {
-          document.body.style.cursor = "pointer";
-          if (arrowRef.current) {
-            arrowRef.current.scale.set(0.22, 0.22, 0.22);
-          }
-        }}
-        onClick={handleArrowClick2}
-        onPointerOut={() => {
-          document.body.style.cursor = "auto";
-          if (arrowRef.current) {
-            arrowRef.current.scale.set(0.2, 0.2, 0.2);
-          }
-        }}
+      {/* === Wrapper Group for Other Elements (Text + Arrows) === */}
+      <a.group
+        scale={otherElementsScale}
+        position-z={otherElementsSpring.zPosition}
       >
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          map={arrowSvg}
-          transparent={true}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      <mesh
-        position={[-5, -2, 0]}
-        rotation={[0, 0, 0]}
-        scale={[0.2, 0.2, 0.2]}
-        onClick={handleArrowClick1}
-        onPointerOver={() => {
-          document.body.style.cursor = "pointer";
-          if (arrowRef.current) {
-            arrowRef.current.scale.set(0.22, 0.22, 0.22);
-          }
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = "auto";
-          if (arrowRef.current) {
-            arrowRef.current.scale.set(0.2, 0.2, 0.2);
-          }
-        }}
-      >
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          map={arrowSvg}
-          transparent={true}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-    </a.group>
+        {/* --- Text Elements --- */}
+        <group position={[1.5 / otherElementsScale, 0, -5.1]}>
+          {/* BUBBLES Letters - Apply individual hover rotation & group opacity */}
+          {letters.map((mesh, i) => (
+            <a.primitive
+              object={mesh}
+              key={mesh.uuid}
+              rotation={letterSprings[i].rotation}
+              material-opacity={otherElementsSpring.opacity}
+            />
+          ))}
+
+          {/* Note TakeR Letters - Apply group opacity */}
+          <group
+            position={[6.7 / otherElementsScale, -4 / otherElementsScale, 0]}
+          >
+            {hubblesLetters.map((mesh) => (
+              <a.primitive
+                object={mesh}
+                key={mesh.uuid}
+                material-opacity={otherElementsSpring.opacity}
+              />
+            ))}
+          </group>
+
+          {/* WelcomE to Letters - Apply group opacity */}
+          <group
+            position={[-9.5 / otherElementsScale, 4 / otherElementsScale, 0]}
+          >
+            {welcomeLetters.map((mesh) => (
+              <a.primitive
+                object={mesh}
+                key={mesh.uuid}
+                material-opacity={otherElementsSpring.opacity}
+              />
+            ))}
+          </group>
+        </group>
+
+        {/* --- Arrow 1 (Top Right) - Apply group opacity --- */}
+        <a.mesh
+          position={[4.9 / otherElementsScale, 2 / otherElementsScale, 0]}
+          rotation={[Math.PI, Math.PI, 0]}
+          scale={[
+            0.2 / otherElementsScale,
+            0.2 / otherElementsScale,
+            0.2 / otherElementsScale,
+          ]}
+          material-opacity={otherElementsSpring.opacity}
+          onClick={handleArrowClick2}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = "pointer";
+            e.object.scale.set(
+              0.22 / otherElementsScale,
+              0.22 / otherElementsScale,
+              0.22 / otherElementsScale
+            );
+          }}
+          onPointerOut={(e) => {
+            document.body.style.cursor = "auto";
+            e.object.scale.set(
+              0.2 / otherElementsScale,
+              0.2 / otherElementsScale,
+              0.2 / otherElementsScale
+            );
+          }}
+          ref={arrowRef2}
+        >
+          <planeGeometry args={[1, 1]} />
+          <primitive object={arrowMaterial2} attach="material" />
+        </a.mesh>
+
+        {/* --- Arrow 2 (Bottom Left) - Apply group opacity --- */}
+        <a.mesh
+          position={[-5 / otherElementsScale, -2 / otherElementsScale, 0]}
+          rotation={[0, 0, 0]}
+          scale={[
+            0.2 / otherElementsScale,
+            0.2 / otherElementsScale,
+            0.2 / otherElementsScale,
+          ]}
+          material-opacity={otherElementsSpring.opacity}
+          onClick={handleArrowClick1}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = "pointer";
+            e.object.scale.set(
+              0.22 / otherElementsScale,
+              0.22 / otherElementsScale,
+              0.22 / otherElementsScale
+            );
+          }}
+          onPointerOut={(e) => {
+            document.body.style.cursor = "auto";
+            e.object.scale.set(
+              0.2 / otherElementsScale,
+              0.2 / otherElementsScale,
+              0.2 / otherElementsScale
+            );
+          }}
+          ref={arrowRef1}
+        >
+          <planeGeometry args={[1, 1]} />
+          <primitive object={arrowMaterial1} attach="material" />
+        </a.mesh>
+      </a.group>
+    </group>
   );
 }
