@@ -1,7 +1,7 @@
-// app/layout.tsx
+// app/layout.js
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/react"; 
+import VercelAnalytics from "@/components/VercelAnalytics"; 
 
 export const metadata = {
   title: "Bubbles",
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
       <html lang="en">
         <body>
           {children}
-          <Analytics /> 
+          <VercelAnalytics /> 
         </body>
       </html>
     </ClerkProvider>
