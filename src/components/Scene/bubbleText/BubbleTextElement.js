@@ -1,18 +1,18 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useLoader, useThree, useFrame } from "@react-three/fiber";
 import { useSprings, a } from "@react-spring/three";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 import * as THREE from "three";
 
-export default function BubbleTextElement({ opacity }) {
+export default function BubbleTextElement({ opacity, disableHover }) {
   // --- Load Font ---
   const LG = useLoader(FontLoader, "/fonts/LG-R.json");
   const { camera } = useThree();
 
   // --- Refs and State ---
   const [hoveredLetter, setHoveredLetter] = useState(null);
-  const lastHoverTimes = useRef(Array(7).fill(null)); // For "BUBBLES" (7 letters)
+  const lastHoverTimes = useRef(Array(7).fill(null));
 
   // --- Materials ---
   const textMaterial = useMemo(() => {
@@ -52,7 +52,7 @@ export default function BubbleTextElement({ opacity }) {
   const mouse = useRef(new THREE.Vector2());
 
   // --- Mouse Move Event ---
-  React.useEffect(() => {
+  useEffect(() => {
     const onMouseMove = (event) => {
       mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -64,40 +64,43 @@ export default function BubbleTextElement({ opacity }) {
 
   // --- Frame Loop ---
   useFrame(() => {
-    // Raycasting for Letter Hover Interaction
+    // Always update raycaster (for smooth transitions)
     raycaster.setFromCamera(mouse.current, camera);
     const intersects = raycaster.intersectObjects(letters);
-    let newHovered = intersects.length > 0 ? intersects[0].object : null;
+    const newHovered = intersects.length > 0 ? intersects[0].object : null;
 
-    if (hoveredLetter !== newHovered) {
-      setHoveredLetter(newHovered);
+    // Only process new hovers if not disabled
+    if (!disableHover) {
+      if (hoveredLetter !== newHovered) {
+        setHoveredLetter(newHovered);
+      }
+
+      // Apply hover animations
+      letters.forEach((letter, i) => {
+        if (letter === newHovered) {
+          const vector = letter.position.clone().project(camera);
+          const deltaX = THREE.MathUtils.clamp(
+            mouse.current.x - vector.x,
+            -0.1,
+            0.1
+          );
+          const deltaY = THREE.MathUtils.clamp(
+            mouse.current.y - vector.y,
+            -0.1,
+            0.1
+          );
+          const targetRotX = -deltaY * 5;
+          const targetRotY = deltaX * 15;
+          lastHoverTimes.current[i] = Date.now();
+
+          letterApi.start((index) =>
+            index === i ? { rotation: [targetRotX, targetRotY, 0] } : undefined
+          );
+        }
+      });
     }
 
-    // Animate 'BUBBLES' letters based on hover
-    letters.forEach((letter, i) => {
-      if (letter === newHovered) {
-        const vector = letter.position.clone().project(camera);
-        const deltaX = THREE.MathUtils.clamp(
-          mouse.current.x - vector.x,
-          -0.1,
-          0.1
-        );
-        const deltaY = THREE.MathUtils.clamp(
-          mouse.current.y - vector.y,
-          -0.1,
-          0.1
-        );
-        const targetRotX = -deltaY * 5;
-        const targetRotY = deltaX * 15;
-        lastHoverTimes.current[i] = Date.now();
-
-        letterApi.start((index) =>
-          index === i ? { rotation: [targetRotX, targetRotY, 0] } : undefined
-        );
-      }
-    });
-
-    // Reset letter rotation after hover timeout
+    // Always process timeouts (even when disabled)
     const now = Date.now();
     lastHoverTimes.current.forEach((time, i) => {
       if (time && now - time > 500) {

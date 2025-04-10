@@ -2,8 +2,16 @@ import React, { useMemo } from "react";
 import { useLoader } from "@react-three/fiber";
 import { useSpring, a } from "@react-spring/three";
 import * as THREE from "three";
+import { useSignUp } from "@clerk/nextjs";
 
-export default function CompanyIconElements({ clicked, isReturning }) {
+export default function CompanyIconElements({
+  clicked,
+  isReturning,
+  setIsLoading,
+}) {
+  // --- Authentication ---
+  const { signUp } = useSignUp();
+
   // --- Load Assets ---
   const googleSvg = useLoader(THREE.TextureLoader, "/google.svg");
   const appleSvg = useLoader(THREE.TextureLoader, "/apple.svg");
@@ -151,11 +159,34 @@ export default function CompanyIconElements({ clicked, isReturning }) {
     springConfig,
   ]);
 
+  // --- Google Click Handler ---
+  const handleGoogleClick = async () => {
+    if (!clicked) return; // Only allow clicks when icons are visible
+    setIsLoading(true);
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/dashboard",
+      });
+    } catch (err) {
+      console.error("Google SSO error:", err);
+      setIsLoading(false);
+    }
+  };
+
   // --- Render ---
   return (
     <group>
       {/* Google Logo */}
-      <a.mesh position={googleSpring.position} scale={[0.6, 0.6, 0.6]}>
+      <a.mesh
+        position={googleSpring.position}
+        scale={[0.6, 0.6, 0.6]}
+        onClick={handleGoogleClick}
+        onPointerOver={() =>
+          clicked && (document.body.style.cursor = "pointer")
+        }
+        onPointerOut={() => (document.body.style.cursor = "auto")}
+      >
         <planeGeometry args={[1, 1]} />
         <a.primitive
           object={googleMaterial}

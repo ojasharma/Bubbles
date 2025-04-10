@@ -6,7 +6,7 @@ import ExtraTextElements from "./extraText/ExtraTextElements";
 import ArrowElements from "./interaction/ArrowElements";
 import CompanyIconElements from "./companyIcons/CompanyIconElements";
 
-export default function Model({ setHovered, hovered }) {
+export default function Model({ setHovered, hovered, setIsLoading }) {
   // --- State Management ---
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [clicked, setClicked] = useState(false);
@@ -76,12 +76,19 @@ export default function Model({ setHovered, hovered }) {
       />
 
       {/* Company Icons */}
-      <CompanyIconElements clicked={clicked} isReturning={isReturning} />
+      <CompanyIconElements
+        clicked={clicked}
+        isReturning={isReturning}
+        setIsLoading={setIsLoading}
+      />
 
       {/* Wrapper Group for Other Elements (Text + Arrows) */}
       <a.group position-z={otherElementsSpring.zPosition}>
         {/* BUBBLES Text */}
-        <BubbleTextElement opacity={otherElementsSpring.opacity} />
+        <BubbleTextElement
+          opacity={otherElementsSpring.opacity}
+          disableHover={hovered}
+        />
 
         {/* Welcome to Note TakeR Text */}
         <ExtraTextElements opacity={otherElementsSpring.opacity} />

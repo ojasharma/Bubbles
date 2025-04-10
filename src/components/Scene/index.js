@@ -5,7 +5,7 @@ import { Environment } from "@react-three/drei";
 import { useState } from "react";
 import styles from "./index.module.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import LoadingOverlay from "../LoadingOverlay/LoadingOverlay"; // Import your loading overlay
+import LoadingOverlay from "../LoadingOverlay/LoadingOverlay";
 
 export default function Index() {
   const [hovered, setHovered] = useState(false);
@@ -20,7 +20,7 @@ export default function Index() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          position: "relative", // Added for proper overlay positioning
+          position: "relative",
         }}
       >
         {isLoading && <LoadingOverlay />}
@@ -28,7 +28,7 @@ export default function Index() {
           <Model
             hovered={hovered}
             setHovered={setHovered}
-            setIsLoading={setIsLoading} // Pass loading state setter
+            setIsLoading={setIsLoading}
           />
           <directionalLight intensity={2} position={[0, 2, 3]} />
           <Environment preset="studio" />
