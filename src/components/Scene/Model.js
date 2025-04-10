@@ -382,8 +382,8 @@ const handleClick = () => {
     // - not clicked
     // - shouldRotate flag is true
     if (!hovered && !clicked && torus.current && shouldRotate.current) {
-      torus.current.rotation.x += 0.002;
-      torus.current.rotation.y += 0.002;
+        rotationX = (rotationX + 0.002) % 2* Math.PI;
+        rotationY = (rotationY + 0.002) % 2* Math.PI;
 
       torusApi.set({
         rotation: [
