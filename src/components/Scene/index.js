@@ -21,10 +21,25 @@ export default function Index() {
           justifyContent: "center",
           alignItems: "center",
           position: "relative",
+          overflow: "hidden",
         }}
       >
+        <div
+          className={`${styles.gradientOverlay} ${
+            hovered ? styles.gradientVisible : ""
+          }`}
+        />
+
         {isLoading && <LoadingOverlay />}
-        <Canvas style={{ width: "100vw", height: "100vh" }}>
+
+        <Canvas
+          style={{
+            width: "100vw",
+            height: "100vh",
+            position: "relative",
+            zIndex: 2, // Make sure Canvas is above the gradient
+          }}
+        >
           <Model
             hovered={hovered}
             setHovered={setHovered}
