@@ -1,26 +1,46 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { useGLTF, MeshTransmissionMaterial } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useSpring, a } from "@react-spring/three";
 import * as THREE from "three";
 
-export default function TorusElement({ setHovered, hovered, clicked, isReturning, onClickBubble }) {
-  // --- Basic Setup ---
+export default function TorusElement({
+  setHovered,
+  hovered,
+  clicked,
+  isReturning,
+  onClickBubble,
+}) {
   const { nodes } = useGLTF("/medias/bubble3d.glb");
-  const torus = useRef();
-  const shouldRotate = useRef(true);
-  let rotationX = 0;
-  let rotationY = 0;
+  const meshRef = useRef();
 
-  // --- Springs for Animation ---
-  const [torusSpring, torusApi] = useSpring(() => ({
+  // Track if auto-rotation is currently active
+  const [isAutoRotating, setIsAutoRotating] = useState(false);
+
+  // Keep track of last hover time and current rotation values
+  const lastInteractionTime = useRef(0);
+  const currentRotation = useRef({ x: 0, y: 0, z: 0 });
+  const rotationSpeed = 0.002;
+
+  // Main spring for torus animations
+  const [springs, api] = useSpring(() => ({
     scale: 20,
-    rotation: [0, 0, 0],
     position: [0, 0, 0],
+    rotationX: 0,
+    rotationY: 0,
+    rotationZ: 0,
     config: { tension: 120, friction: 14 },
+    onChange: ({ value }) => {
+      // Keep track of current rotation values
+      currentRotation.current = {
+        x: value.rotationX,
+        y: value.rotationY,
+        z: value.rotationZ,
+      };
+    },
   }));
 
-  // --- Materials ---
+  // Material properties
   const materialProps = useMemo(
     () => ({
       thickness: 1.1,
@@ -33,82 +53,99 @@ export default function TorusElement({ setHovered, hovered, clicked, isReturning
     []
   );
 
-  // --- Update animations based on state ---
-  React.useEffect(() => {
-    // Only apply hover effects when NOT clicked AND NOT currently returning from clicked state
-    if (!clicked && !isReturning) {
-      torusApi.start({
-        scale: hovered ? 22 : 20,
-        rotation: hovered ? [0, 0, 0] : torusSpring.rotation.get(),
+  // Handle hover state changes
+  useEffect(() => {
+    if (clicked || isReturning) return;
+
+    const now = Date.now();
+    lastInteractionTime.current = now;
+
+    if (hovered) {
+      // Pause auto-rotation when hovering
+      setIsAutoRotating(false);
+
+      // Animate to zero rotation when hovering
+      api.start({
+        scale: 22,
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: 0,
         config: { tension: 120, friction: 14 },
       });
-    }
-  }, [hovered, clicked, isReturning, torusApi, torusSpring.rotation]);
-
-  // --- Animation for click state ---
-  React.useEffect(() => {
-    shouldRotate.current = !clicked && !isReturning;
-    
-    const slowConfig = { tension: 130, friction: 30, mass: 2 };
-    const returnConfig = { tension: 60, friction: 30, mass: 1.5 };
-
-    if (clicked) {
-      // GOING TO clicked state
-      torusApi.start({
-        scale: 15,
-        position: [0, 0, 0],
-        rotation: [0, 0, -Math.PI / 2],
-        config: slowConfig,
-      });
-    } else if (isReturning) {
-      // RETURNING FROM clicked state
-      torusApi.start({
+    } else {
+      // When unhovered, stay at current position momentarily
+      // Auto-rotation will smoothly take over
+      api.start({
         scale: 20,
-        position: [0, 0, 0],
-        rotation: [0, 0, 0],
-        config: returnConfig,
+        config: { tension: 120, friction: 14 },
         onRest: () => {
-          shouldRotate.current = true;
-          if (torus.current) {
-            torus.current.rotation.x = 0;
-            torus.current.rotation.y = 0;
-            torus.current.rotation.z = 0;
-          }
+          // Resume auto-rotation after unhover animation completes
+          setIsAutoRotating(true);
         },
       });
     }
-  }, [clicked, isReturning, torusApi]);
+  }, [hovered, clicked, isReturning, api]);
 
-  // --- Frame Loop ---
-  useFrame((state, delta) => {
-    // Continuous Torus rotation ONLY when:
-    // - not hovered
-    // - not clicked
-    // - shouldRotate flag is true
-    if (!hovered && !clicked && torus.current && shouldRotate.current) {
-      rotationX = (rotationX + 0.002) % (2 * Math.PI);
-      rotationY = (rotationY + 0.002) % (2 * Math.PI);
-      
-      torus.current.rotation.x = rotationX;
-      torus.current.rotation.y = rotationY;
+  // Handle click/return state changes
+  useEffect(() => {
+    const now = Date.now();
+    lastInteractionTime.current = now;
+    setIsAutoRotating(false);
 
-      torusApi.set({
-        rotation: [
-          torus.current.rotation.x,
-          torus.current.rotation.y,
-          torus.current.rotation.z,
-        ],
+    if (clicked) {
+      // When clicked, animate to expanded state
+      api.start({
+        scale: 15,
+        position: [0, 0, 0],
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: -Math.PI / 2,
+        config: { tension: 130, friction: 30, mass: 2 },
       });
+    } else if (isReturning) {
+      // When returning, reset to default state
+      api.start({
+        scale: 20,
+        position: [0, 0, 0],
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: 0,
+        config: { tension: 60, friction: 30, mass: 1.5 },
+        onRest: () => {
+          // Resume auto-rotation after return animation
+          setIsAutoRotating(true);
+        },
+      });
+    }
+  }, [clicked, isReturning, api]);
+
+  // Frame update - handle auto-rotation when nothing else is happening
+  useFrame((state, delta) => {
+    // Only auto-rotate when explicitly allowed and not interacting
+    if (isAutoRotating && !hovered && !clicked && !isReturning) {
+      // Time since last interaction
+      const timeSinceLastInteraction = Date.now() - lastInteractionTime.current;
+
+      if (timeSinceLastInteraction > 500) {
+        // Smoothly animate rotation with springs rather than directly setting values
+        api.start({
+          rotationX: currentRotation.current.x + rotationSpeed * 10,
+          rotationY: currentRotation.current.y + rotationSpeed * 10,
+          config: { duration: 200, easing: (t) => t },
+          reset: false,
+        });
+      }
     }
   });
 
-  // --- Render ---
   return (
-    <a.group scale={torusSpring.scale} position={torusSpring.position}>
+    <a.group scale={springs.scale} position={springs.position}>
       <a.mesh
-        ref={torus}
+        ref={meshRef}
         geometry={nodes.Curve.geometry}
-        rotation={torusSpring.rotation}
+        rotation-x={springs.rotationX}
+        rotation-y={springs.rotationY}
+        rotation-z={springs.rotationZ}
         onPointerOver={(e) => {
           e.stopPropagation();
           if (!clicked && !isReturning) setHovered(true);
