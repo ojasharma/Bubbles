@@ -20,7 +20,7 @@ const MouseFollower = () => {
   const requestRef = useRef(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const lastMoveTime = useRef(Date.now());
-  const gravity = 0.1;
+  const gravity = 0.05;
   const energyLoss = 0.7;
   const maxBounces = 4;
   const maxBubbles = 4;
@@ -63,8 +63,8 @@ const MouseFollower = () => {
           const speed = Math.sqrt(velocity.x ** 2 + velocity.y ** 2);
 
           const angleOffset = (index / maxBubbles) * Math.PI * 2;
-          const offsetX = Math.cos(angleOffset) * 40; // half of 80
-          const offsetY = Math.sin(angleOffset) * 40;
+          const offsetX = Math.cos(angleOffset) * 180; // half of 80
+          const offsetY = Math.sin(angleOffset) * 180;
 
           const dx = mousePos.current.x + offsetX - position.x;
           const dy = mousePos.current.y + offsetY - position.y;
