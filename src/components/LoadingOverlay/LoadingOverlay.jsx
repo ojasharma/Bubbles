@@ -30,7 +30,7 @@ export default function LoadingOverlay() {
     <div className={styles.loadingOverlay}>
       <div className={styles.loadingContent}>
         <div className={styles.loadingSpinner}></div>
-        <p className={styles.loadingText}>Redirecting...</p>
+        <p className={styles.loadingText}>Confirming you are a human...</p>
       </div>
     </div>
   );

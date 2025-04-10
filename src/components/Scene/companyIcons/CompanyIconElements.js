@@ -174,6 +174,36 @@ export default function CompanyIconElements({
     }
   };
 
+  // --- Microsoft Click Handler ---
+  const handleMicrosoftClick = async () => {
+    if (!clicked) return;
+    setIsLoading(true);
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_microsoft",
+        redirectUrl: "/dashboard",
+      });
+    } catch (err) {
+      console.error("Microsoft SSO error:", err);
+      setIsLoading(false);
+    }
+  };
+
+  // --- Facebook Click Handler ---
+  const handleFacebookClick = async () => {
+    if (!clicked) return;
+    setIsLoading(true);
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: "oauth_facebook",
+        redirectUrl: "/dashboard",
+      });
+    } catch (err) {
+      console.error("Facebook SSO error:", err);
+      setIsLoading(false);
+    }
+  };
+
   // --- Render ---
   return (
     <group>
@@ -206,7 +236,15 @@ export default function CompanyIconElements({
       </a.mesh>
 
       {/* Microsoft Logo */}
-      <a.mesh position={microsoftSpring.position} scale={[0.6, 0.6, 0.6]}>
+      <a.mesh
+        position={microsoftSpring.position}
+        scale={[0.6, 0.6, 0.6]}
+        onClick={handleMicrosoftClick}
+        onPointerOver={() =>
+          clicked && (document.body.style.cursor = "pointer")
+        }
+        onPointerOut={() => (document.body.style.cursor = "auto")}
+      >
         <planeGeometry args={[1, 1]} />
         <a.primitive
           object={microsoftMaterial}
@@ -216,7 +254,15 @@ export default function CompanyIconElements({
       </a.mesh>
 
       {/* Facebook Logo */}
-      <a.mesh position={facebookSpring.position} scale={[0.6, 0.6, 0.6]}>
+      <a.mesh
+        position={facebookSpring.position}
+        scale={[0.6, 0.6, 0.6]}
+        onClick={handleFacebookClick}
+        onPointerOver={() =>
+          clicked && (document.body.style.cursor = "pointer")
+        }
+        onPointerOut={() => (document.body.style.cursor = "auto")}
+      >
         <planeGeometry args={[1, 1]} />
         <a.primitive
           object={facebookMaterial}
