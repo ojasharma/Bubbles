@@ -3,6 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 
 const MouseFollower = () => {
+  const circleSize = 50; // half of 100
+  const radius = circleSize / 2;
+
   const [bubbles, setBubbles] = useState([
     {
       id: 0,
@@ -13,6 +16,7 @@ const MouseFollower = () => {
       spawned: false,
     },
   ]);
+
   const requestRef = useRef(null);
   const mousePos = useRef({ x: 0, y: 0 });
   const lastMoveTime = useRef(Date.now());
@@ -20,7 +24,7 @@ const MouseFollower = () => {
   const energyLoss = 0.7;
   const maxBounces = 4;
   const maxBubbles = 4;
-  const popSpeedThreshold = 700; // Speed threshold for popping
+  const popSpeedThreshold = 700;
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -35,7 +39,10 @@ const MouseFollower = () => {
           const newBubble = {
             id: Date.now(),
             position: { x: 50, y: 50 },
-            velocity: { x: Math.random() * 4 - 2, y: Math.random() * 4 - 2 },
+            velocity: {
+              x: Math.random() * 4 - 2,
+              y: Math.random() * 4 - 2,
+            },
             isMoving: false,
             bounces: 0,
             spawned: false,
@@ -50,23 +57,22 @@ const MouseFollower = () => {
       const currentTime = Date.now();
       const timeSinceLastMove = currentTime - lastMoveTime.current;
 
-      setBubbles((prevBubbles) => {
-        const updatedBubbles = prevBubbles.flatMap((bubble, index) => {
+      setBubbles((prevBubbles) =>
+        prevBubbles.flatMap((bubble, index) => {
           const { position, velocity, isMoving, bounces, spawned } = bubble;
           const speed = Math.sqrt(velocity.x ** 2 + velocity.y ** 2);
 
-          // Calculate mouse offset
           const angleOffset = (index / maxBubbles) * Math.PI * 2;
-          const offsetX = Math.cos(angleOffset) * 80;
-          const offsetY = Math.sin(angleOffset) * 80;
+          const offsetX = Math.cos(angleOffset) * 40; // half of 80
+          const offsetY = Math.sin(angleOffset) * 40;
+
           const dx = mousePos.current.x + offsetX - position.x;
           const dy = mousePos.current.y + offsetY - position.y;
           const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
-          // Apply a repelling force if the bubble is too close to the mouse
           let repellingForce = { x: 0, y: 0 };
-          if (distance < 80) {
-            const repellingStrength = (80 - distance) * 0.05;
+          if (distance < 40) {
+            const repellingStrength = (40 - distance) * 0.05;
             repellingForce = {
               x: (-dx / distance) * repellingStrength,
               y: (-dy / distance) * repellingStrength,
@@ -78,7 +84,10 @@ const MouseFollower = () => {
                 x: dx * 0.1 + repellingForce.x,
                 y: dy * 0.1 + repellingForce.y,
               }
-            : { x: velocity.x * 0.95, y: velocity.y * 0.95 + gravity };
+            : {
+                x: velocity.x * 0.95,
+                y: velocity.y * 0.95 + gravity,
+              };
 
           let newX = position.x + newVelocity.x;
           let newY = position.y + newVelocity.y;
@@ -87,14 +96,12 @@ const MouseFollower = () => {
           const windowHeight = window.innerHeight;
           const windowWidth = window.innerWidth;
 
-          // Collision with bottom
-          if (newY + 50 >= windowHeight) {
+          if (newY + radius >= windowHeight) {
             if (speed > popSpeedThreshold && isMoving) {
-              // Pop the bubble if the speed is too high
               spawnBubble();
               return [];
             }
-            newY = windowHeight - 50;
+            newY = windowHeight - radius;
             newVelY = -newVelocity.y * energyLoss;
 
             if (Math.abs(newVelY) < 1) newVelY = 0;
@@ -107,16 +114,14 @@ const MouseFollower = () => {
           return {
             ...bubble,
             position: {
-              x: Math.min(windowWidth - 50, Math.max(0, newX)),
+              x: Math.min(windowWidth - radius, Math.max(radius, newX)),
               y: newY,
             },
             velocity: { x: newVelocity.x, y: newVelY },
             isMoving: timeSinceLastMove <= 200,
           };
-        });
-
-        return updatedBubbles;
-      });
+        })
+      );
 
       requestRef.current = requestAnimationFrame(updatePosition);
     };
@@ -129,8 +134,6 @@ const MouseFollower = () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, []);
-
-  const circleSize = 100;
 
   return (
     <>
@@ -152,8 +155,8 @@ const MouseFollower = () => {
               width: `${circleSize}px`,
               height: `${circleSize}px`,
               pointerEvents: "none",
-              transform: `translate(${bubble.position.x - circleSize / 2}px, ${
-                bubble.position.y - circleSize / 2
+              transform: `translate(${bubble.position.x - radius}px, ${
+                bubble.position.y - radius
               }px) rotate(${angle}rad) scale(${1 + stretchFactor}, ${
                 1 - stretchFactor * 0.5
               })`,

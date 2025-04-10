@@ -1,6 +1,10 @@
 /* globals.css */
-body {
+
+html, body {
+  height: 100vh;
+  width: 100vw;
   margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -93,4 +97,33 @@ body {
 
 .transition-overlay.active {
   opacity: 1;
+}
+.clerk-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clerk-modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.clerk-close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
 }

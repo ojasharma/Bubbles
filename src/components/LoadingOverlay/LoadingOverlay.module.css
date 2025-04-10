@@ -1,0 +1,45 @@
+/* src/components/LoadingOverlay/LoadingOverlay.module.css */
+.loadingOverlay {
+  position: fixed; /* Cover the whole viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark background */
+  color: white;
+  /* --- Ensure this is BELOW the CAPTCHA container --- */
+  z-index: 10000; /* High, but potentially lower than Clerk's CAPTCHA if needed */
+  font-size: 1.5rem;
+  font-family: sans-serif; /* Using a default fallback */
+
+  /* Blur effect */
+  -webkit-backdrop-filter: blur(8px); /* Adjust blur amount */
+  backdrop-filter: blur(8px);
+
+  /* Ensure content inside is interactive if needed, though spinner isn't */
+  pointer-events: auto;
+}
+
+.loadingContent {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+}
+
+.loadingSpinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #fff; /* White spinner */
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

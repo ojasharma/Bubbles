@@ -466,7 +466,10 @@ const handleClick = () => {
       </a.group>
 
       {/* Google Logo */}
-      <a.mesh position={googleSpring.position} scale={[0.6, 0.6, 0.6]}>
+      <a.mesh
+        position={googleSpring.position}
+        scale={[0.6, 0.6, 0.6]}
+      >
         <planeGeometry args={[1, 1]} />
         <a.primitive
           object={googleMaterial}
