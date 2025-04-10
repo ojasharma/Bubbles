@@ -49,7 +49,7 @@ export default function BubbleTextElement({ opacity, disableHover }) {
 
   // --- Raycasting Setup ---
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  const mouse = useRef(new THREE.Vector2());
+  const mouse = useRef(new THREE.Vector2(-1000, -1000)); // Initialize to far off-screen
 
   // --- Mouse Move Event ---
   useEffect(() => {

@@ -15,7 +15,9 @@ export default function TorusElement({
   const meshRef = useRef();
 
   // Track if auto-rotation is currently active
-  const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
+
+
 
   // Keep track of last hover time and current rotation values
   const lastInteractionTime = useRef(0);
@@ -136,7 +138,18 @@ export default function TorusElement({
         });
       }
     }
+    
   });
+  useEffect(() => {
+    // Set a small timeout to ensure everything else is initialized
+    const timer = setTimeout(() => {
+      setIsAutoRotating(true);
+      lastInteractionTime.current = 0; // Reset interaction time to ensure rotation starts
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+  
 
   return (
     <a.group scale={springs.scale} position={springs.position}>
