@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🫧 Bubbles - A Modern Note-Taking Experience
 
-## Getting Started
+![Bubbles Logo](public/bubble.png)
 
-First, run the development server:
+> 🚧 **Work in Progress**: Currently in active development with authentication features implemented.
 
+## 🌟 Overview
+
+Bubbles is reimagining the note-taking experience with an innovative design language and smart features. Going beyond traditional note-taking apps, Bubbles aims to create an engaging and interactive way to capture, organize, and revisit your thoughts.
+
+## ✨ Features
+
+### Current Features
+- 🔐 **Authentication System**
+  - Google OAuth Integration
+  - Microsoft OAuth Integration
+  - Facebook OAuth Integration
+  - Secure sign-in management via Clerk
+
+### 🎯 Planned Features
+- 📝 Smart Note Organization
+- 🤖 AI-powered Note Suggestions
+- 🎨 Visual Knowledge Maps
+- 📊 Habit Tracking Integration
+- 🔄 Visual Roadmaps
+- 🎯 Interactive Goal Setting
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 14
+- **Authentication**: Clerk
+- **3D Graphics**: Three.js / React Three Fiber
+- **Animations**: React Spring
+- **Styling**: CSS Modules
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/bubbles.git
+cd bubbles
+```
+
+2. **Install dependencies**
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Set up environment variables**
+```bash
+cp .env.example .env.local
+```
+Fill in your Clerk credentials and other required environment variables.
+
+4. **Run the development server**
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🎨 Design Philosophy
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Bubbles combines fluid animations, interactive 3D elements, and a minimalist interface to create a unique note-taking experience. The design language emphasizes:
 
-## Learn More
+- Fluid Interactions
+- Visual Feedback
+- Intuitive Navigation
+- Seamless Transitions
 
-To learn more about Next.js, take a look at the following resources:
+## 🤝 Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+While this project is still in early development, we welcome feedback and suggestions! Feel free to:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. 🐛 Report bugs
+2. 💡 Suggest features
+3. 📝 Submit pull requests
 
-## Deploy on Vercel
+## 📝 License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## 👨‍💻 Author
+
+- [@dieselsharma](https://twitter.com/dieselsharma) - Designer & Developer
+
+## 🔗 Links
+
+- [Live Demo](https://bubbles-note.vercel.app)
+- [GitHub Repository](https://github.com/ojasharma/Bubbles)
+- [Follow Development Progress](https://twitter.com/dieselsharma)
+
+---
+
+<p align="center">Made with ❤️ by @ojasharma</p>
