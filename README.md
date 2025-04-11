@@ -17,14 +17,6 @@ Bubbles is reimagining the note-taking experience with an innovative design lang
   - Facebook OAuth Integration
   - Secure sign-in management via Clerk
 
-### 🎯 Planned Features
-- 📝 Smart Note Organization
-- 🤖 AI-powered Note Suggestions
-- 🎨 Visual Knowledge Maps
-- 📊 Habit Tracking Integration
-- 🔄 Visual Roadmaps
-- 🎯 Interactive Goal Setting
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14
