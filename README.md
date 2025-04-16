@@ -1,6 +1,6 @@
 # 🫧 Bubbles - A Modern Note-Taking Experience
 
-![Bubbles Logo](public/bubble.png)
+![Bubbles Logo](public/logo.svg)
 
 > 🚧 **Work in Progress**: Currently in active development with authentication features implemented.
 
